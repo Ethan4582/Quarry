@@ -1,0 +1,32 @@
+{
+  "name": "@quarry/ingestion",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./github": "./src/github/index.ts",
+    "./archetype": "./src/archetype.ts",
+    "./chunking/modules": "./src/chunking/modules.ts",
+    "./chunking/symbols": "./src/chunking/symbols.ts",
+    "./chunking/coalesce": "./src/chunking/coalesce.ts",
+    "./embeddings": "./src/embeddings.ts",
+    "./vector-store": "./src/vector-store.ts"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@pinecone-database/pinecone": "^8.0.0",
+    "octokit": "^5.0.5",
+    "p-limit": "^7.3.0",
+    "tree-sitter-python": "^0.25.0",
+    "tree-sitter-typescript": "^0.23.2",
+    "voyageai": "^0.4.0",
+    "web-tree-sitter": "^0.26.9"
+  }
+}

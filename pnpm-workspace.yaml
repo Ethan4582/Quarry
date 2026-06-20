@@ -3,4 +3,7 @@ packages:
   - "packages/*"
 allowBuilds:
   sharp: false
+  tree-sitter-javascript: false
+  tree-sitter-python: false
+  tree-sitter-typescript: false
   unrs-resolver: false

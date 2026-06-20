@@ -14,6 +14,7 @@
     "@ai-sdk/openai": "^1.3.24",
     "@quarry/ai": "workspace:*",
     "@quarry/db": "workspace:*",
+    "@quarry/ingestion": "workspace:*",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "ai": "^4.3.19",
