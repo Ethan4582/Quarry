@@ -1,0 +1,12 @@
+{
+  "name": "@quarry/ai",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "ai": "^3.0.0",
+    "@ai-sdk/anthropic": "^0.0.1",
+    "@ai-sdk/openai": "^0.0.1",
+    "@ai-sdk/google": "^0.0.1"
+  }
+}
