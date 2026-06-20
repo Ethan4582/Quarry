@@ -1,2 +1,65 @@
+
+# Dependencies
+
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Environment files
+
 .env
-.npmrc
+.env.local
+.env.*.local
+
+# Turborepo
+
+.turbo/
+skills/
+pr
+
+# Build outputs
+
+dist/
+build/
+.next/
+out/
+coverage/
+
+# Logs
+
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Cache
+
+.cache/
+.parcel-cache/
+.eslintcache
+
+# TypeScript
+
+*.tsbuildinfo
+
+# IDE
+
+.vscode/
+.idea/
+
+# OS
+
+.DS_Store
+Thumbs.db
+
+# Skills folder
+
+skills/
+
+# Optional local files
+
+tmp/
+temp/
+*.local
