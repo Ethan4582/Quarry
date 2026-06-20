@@ -67,28 +67,28 @@ export function SubmitRepoForm({ githubUsername }: { githubUsername?: string }) 
           onKeyDown={e => e.key === "Enter" && !loading && submit(repoStr)}
           placeholder="Paste GitHub URL or owner/repo..."
           disabled={loading}
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-dark-gray/50 outline-none"
+          className="flex-1 bg-transparent text-base text-white placeholder:text-dark-gray/50 outline-none"
         />
         <button
           onClick={() => submit(repoStr)}
           disabled={loading || !repoStr.trim()}
-          className="flex items-center gap-1.5 bg-gradient-to-b from-[#6b75df] to-royal-blue-1 border border-royal-blue-1/40 shadow-[0_2px_8px_rgba(94,106,210,0.3),inset_0_1px_0_rgba(255,255,255,0.12)] text-white px-3 py-1.5 rounded-md text-xs font-medium hover:brightness-110 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+          className="flex items-center gap-1.5 bg-gradient-to-b from-[#6b75df] to-royal-blue-1 border border-royal-blue-1/40 shadow-[0_2px_8px_rgba(94,106,210,0.3),inset_0_1px_0_rgba(255,255,255,0.12)] text-white px-3 py-1.5 rounded-md text-sm font-medium hover:brightness-110 active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
         >
           {loading ? <Loader2 size={12} className="animate-spin" /> : null}
           {loading ? "Ingesting..." : "Ingest"}
         </button>
       </div>
 
-      {error && <p className="text-tomato-1 text-xs px-1">{error}</p>}
+      {error && <p className="text-tomato-1 text-sm px-1">{error}</p>}
 
       {/* Recent repos quick-select */}
       {githubUsername && (
         <div>
-          <p className="text-[11px] font-medium text-dark-gray/60 uppercase tracking-wider px-1 mb-2">
+          <p className="text-sm font-medium text-dark-gray/60 uppercase tracking-wider px-1 mb-2">
             Your recent repos
           </p>
           {loadingRepos ? (
-            <div className="flex items-center gap-2 text-xs text-dark-gray px-1 py-1">
+            <div className="flex items-center gap-2 text-sm text-dark-gray px-1 py-1">
               <Loader2 size={11} className="animate-spin" /> Loading...
             </div>
           ) : (
@@ -101,7 +101,7 @@ export function SubmitRepoForm({ githubUsername }: { githubUsername?: string }) 
                   className="flex items-center gap-2 text-left bg-dark-gray-16 hover:bg-dark-gray-20 border border-dim-gray/10 hover:border-dim-gray/25 px-2.5 py-2 rounded-md transition-colors disabled:opacity-50 group"
                 >
                   <Image src="/github.png" alt="GitHub" width={14} height={14} className="opacity-70 shrink-0" />
-                  <span className="text-xs text-dark-gray group-hover:text-white transition-colors truncate">{r.name}</span>
+                  <span className="text-sm text-dark-gray group-hover:text-white transition-colors truncate">{r.name}</span>
                 </button>
               ))}
             </div>

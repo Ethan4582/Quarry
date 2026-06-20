@@ -1,9 +1,8 @@
 "use client";
 
-import { StatCard } from "@/components/StatCard";
-import { Badge } from "@/components/Badge";
-import { Search, User, Filter, AlertTriangle } from "lucide-react";
+import { Search, Users, GitCommit, Filter } from "lucide-react";
 import { use } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ContributorsPage({ params }: { params: Promise<{ repoId: string }> }) {
   const { repoId } = use(params);
@@ -12,121 +11,93 @@ export default function ContributorsPage({ params }: { params: Promise<{ repoId:
     <div className="h-full flex flex-col bg-background p-6 lg:p-8 overflow-y-auto">
       <div className="max-w-7xl mx-auto w-full space-y-6">
         
-        {/* Stat row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard title="Contributors" value="24" />
-          <StatCard title="Silo Owners" value="3" trend="Attention" trendDirection="down" />
-          <StatCard title="Bus Factor Risk" value="12" description="Files solely owned" />
-          <StatCard title="Dead Lines Owned" value="4.2k" />
-        </div>
-
-        {/* Filter/Search Bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative w-full sm:w-64">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <input 
-              type="text" 
-              placeholder="Search contributors..." 
-              className="w-full bg-card border border-border/50 rounded-md pl-8 pr-3 py-1.5 text-xs text-foreground outline-none focus:border-primary/50 shadow-sm"
-            />
+        {/* Title and Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Contributors</h1>
+            <p className="text-sm text-muted-foreground mt-1">Analyze team impact, knowledge distribution, and collaboration.</p>
           </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <button className="flex items-center gap-1.5 bg-card border border-border/50 text-xs px-3 py-1.5 rounded-md text-foreground shadow-sm hover:bg-secondary">
-              <Filter size={12} />
-              Filter
-            </button>
-            <select className="bg-card border border-border/50 text-xs px-3 py-1.5 rounded-md outline-none text-foreground shadow-sm flex-1 sm:flex-none">
-              <option>Sort: Files Owned</option>
-              <option>Sort: Commits</option>
-              <option>Sort: Risk Level</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Contributor Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
-          <div className="bg-card border border-border/50 rounded-xl p-5 shadow-sm hover:border-primary/50 transition-colors cursor-pointer group">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <User size={20} className="text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">alice@example.com</h3>
-                  <p className="text-xs text-muted-foreground">Alice Smith</p>
-                </div>
-              </div>
-              <Badge variant="destructive" className="h-5 text-[10px] px-2 py-0 gap-1">
-                <AlertTriangle size={10} />
-                Silo Owner
-              </Badge>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2 text-muted-foreground" size={14} />
+              <input 
+                type="text" 
+                placeholder="Search contributors..." 
+                className="pl-8 pr-4 py-1.5 text-sm bg-card border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary w-64 text-foreground"
+              />
             </div>
-            
-            <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs mb-4">
-              <div>
-                <p className="text-muted-foreground">Files Owned</p>
-                <p className="font-medium text-foreground mt-0.5">142</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Hotspots</p>
-                <p className="font-medium text-amber-500 mt-0.5">4</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Bus Factor 1</p>
-                <p className="font-medium text-red-500 mt-0.5">12 files</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Dead Lines</p>
-                <p className="font-medium text-foreground mt-0.5">1.2k</p>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>842 commits (last 90d)</span>
-              <span>Touched 2h ago</span>
-            </div>
+            <button className="bg-card border border-border/50 p-2 rounded-md hover:bg-secondary/50 text-muted-foreground transition-colors">
+              <Filter size={14} />
+            </button>
           </div>
-
-          <div className="bg-card border border-border/50 rounded-xl p-5 shadow-sm hover:border-primary/50 transition-colors cursor-pointer group">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                  <User size={20} className="text-muted-foreground" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">bob@example.com</h3>
-                  <p className="text-xs text-muted-foreground">Bob Jones</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-xs mb-4">
-              <div>
-                <p className="text-muted-foreground">Files Owned</p>
-                <p className="font-medium text-foreground mt-0.5">12</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Hotspots</p>
-                <p className="font-medium text-foreground mt-0.5">0</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Bus Factor 1</p>
-                <p className="font-medium text-foreground mt-0.5">0 files</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Dead Lines</p>
-                <p className="font-medium text-foreground mt-0.5">42</p>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>14 commits (last 90d)</span>
-              <span>Touched 1d ago</span>
-            </div>
-          </div>
-
         </div>
+
+        {/* Global Contributor Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
+             <div className="flex items-center gap-2 text-muted-foreground">
+               <Users size={16} />
+               <h3 className="text-xs font-semibold uppercase tracking-wider">Total Active</h3>
+             </div>
+             <Skeleton className="h-8 w-16" />
+           </div>
+           
+           <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
+             <div className="flex items-center gap-2 text-muted-foreground">
+               <GitCommit size={16} />
+               <h3 className="text-xs font-semibold uppercase tracking-wider">Avg Commits/Wk</h3>
+             </div>
+             <Skeleton className="h-8 w-20" />
+           </div>
+
+           <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
+             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bus Factor Risk</h3>
+             <Skeleton className="h-8 w-12" />
+             <Skeleton className="h-2 w-full" />
+           </div>
+
+           <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
+             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">AI Assistance</h3>
+             <Skeleton className="h-8 w-16" />
+             <Skeleton className="h-2 w-full" />
+           </div>
+        </div>
+
+        {/* Contributors Grid (Skeleton) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="bg-card border border-border/50 rounded-lg p-5 shadow-sm flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-12 h-12 rounded-full shrink-0" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Commits</span>
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Files Touched</span>
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Primary Focus</span>
+                  <Skeleton className="h-5 w-24 rounded-md" />
+                </div>
+              </div>
+              
+              <div className="mt-auto pt-4 border-t border-border/50">
+                <Skeleton className="h-8 w-full rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+
       </div>
     </div>
   );

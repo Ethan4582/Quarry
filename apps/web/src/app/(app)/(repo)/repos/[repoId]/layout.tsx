@@ -33,14 +33,14 @@ export default async function RepoLayout({
   }
 
   const TABS = [
-    { name: "Overview", path: `/repos/${repoId}`, active: true, disabled: false },
-    { name: "Documentation", disabled: repo.status !== "done" },
-    { name: "Architecture", disabled: repo.status !== "done" },
-    { name: "Code Health", disabled: repo.status !== "done" },
-    { name: "Commits", disabled: repo.status !== "done" },
-    { name: "Contributors", disabled: repo.status !== "done" },
-    { name: "Decisions", disabled: repo.status !== "done" },
-    { name: "Chat", disabled: repo.status !== "done" },
+    { name: "Overview", path: `/repos/${repoId}` },
+    { name: "Documentation", path: `/repos/${repoId}/docs` },
+    { name: "Architecture", path: `/repos/${repoId}/architecture` },
+    { name: "Code Health", path: `/repos/${repoId}/code-health` },
+    { name: "Commits", path: `/repos/${repoId}/commits` },
+    { name: "Contributors", path: `/repos/${repoId}/contributors` },
+    { name: "Decisions", path: `/repos/${repoId}/decisions` },
+    { name: "Chat", path: `/repos/${repoId}/chat` },
   ];
 
   return (
@@ -60,50 +60,39 @@ export default async function RepoLayout({
         {/* Nav Tabs */}
         <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {TABS.map((tab) => (
-            tab.disabled ? (
-              <span 
-                key={tab.name} 
-                className="block px-2 py-1.5 text-xs text-dark-gray/30 cursor-not-allowed font-medium rounded-md"
-              >
-                {tab.name}
-              </span>
-            ) : (
               <Link
                 key={tab.name}
-                href={tab.path!}
-                className={`block px-2 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                  tab.active ? "bg-dark-gray-16 text-white" : "text-dark-gray hover:text-white hover:bg-dark-gray-16/50"
-                }`}
+                href={tab.path}
+                className="block px-3 py-2 text-sm font-medium rounded-md transition-colors text-muted-foreground hover:text-foreground hover:bg-white/5"
               >
                 {tab.name}
               </Link>
-            )
           ))}
 
-          <div className="pt-4 pb-1 px-2">
-            <span className="border-t border-dim-gray/10 w-full block pt-3 text-[10px] font-semibold uppercase tracking-widest text-dark-gray/40">Settings</span>
+          <div className="pt-4 pb-1 px-3">
+            <span className="border-t border-border/10 w-full block pt-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Settings</span>
           </div>
           <Link
             href={`/repos/${repoId}/settings`}
-            className="flex items-center gap-2.5 px-2 py-1.5 text-xs text-dark-gray hover:text-white hover:bg-dark-gray-16/50 rounded-md transition-colors"
+            className="flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-md transition-colors"
           >
             Repository Settings
           </Link>
         </nav>
 
         {/* User */}
-        <div className="p-3 border-t border-dim-gray/10">
-          <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-dark-gray-16 transition-colors cursor-default">
+        <div className="p-4 border-t border-border/10">
+          <div className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 transition-colors cursor-default">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="" className="w-6 h-6 rounded-full border border-dim-gray/20" />
+              <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full border border-border/20" />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-dark-gray-16 border border-dim-gray/20 flex items-center justify-center text-[10px] text-dark-gray">
+              <div className="w-8 h-8 rounded-full bg-secondary border border-border/20 flex items-center justify-center text-sm text-muted-foreground">
                 {profile?.github_username?.[0]?.toUpperCase() ?? "U"}
               </div>
             )}
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-medium text-white truncate">{profile?.github_username ?? "User"}</span>
-              <span className="text-[10px] text-dark-gray/50">Personal</span>
+              <span className="text-sm font-medium text-foreground truncate">{profile?.github_username ?? "User"}</span>
+              <span className="text-xs text-muted-foreground">Personal</span>
             </div>
           </div>
         </div>
