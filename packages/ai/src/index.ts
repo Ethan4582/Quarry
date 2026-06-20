@@ -1,19 +1,21 @@
-import { anthropic } from "@ai-sdk/anthropic";
-import { openai } from "@ai-sdk/openai";
-import { google } from "@ai-sdk/google";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 export type Provider = "anthropic" | "openai" | "google";
 
-// Placeholder resolver
 function resolveModel(provider: Provider, apiKey: string) {
   switch (provider) {
     case "anthropic":
-      return anthropic("claude-sonnet-4-6", { apiKey });
+      const anthropic = createAnthropic({ apiKey });
+      return anthropic("claude-3-5-sonnet-20240620");
     case "openai":
-      return openai("gpt-5-mini", { apiKey });
+      const openai = createOpenAI({ apiKey });
+      return openai("gpt-4o-mini");
     case "google":
-      return google("gemini-2.5-flash", { apiKey });
+      const google = createGoogleGenerativeAI({ apiKey });
+      return google("gemini-2.5-flash");
   }
 }
 

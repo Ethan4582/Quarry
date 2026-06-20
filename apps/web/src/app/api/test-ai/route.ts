@@ -9,7 +9,14 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { provider, apiKey, prompt } = await req.json();
-  const text = await testGenerate(provider, apiKey, prompt);
-  return NextResponse.json({ text });
+  try {
+    const { provider, apiKey, prompt } = await req.json();
+    const text = await testGenerate(provider, apiKey, prompt);
+    return NextResponse.json({ text });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+  
 }
+
+
