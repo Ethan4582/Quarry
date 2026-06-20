@@ -43,14 +43,17 @@ async function getParser(lang: "typescript" | "python"): Promise<Parser> {
 
   await Parser.init();
   const parser = new Parser();
+  
+  // Use eval to completely hide the require from Turbopack's static analysis
+  const reqResolve = eval("require.resolve");
 
   if (lang === "typescript") {
-    const wasmPath = require.resolve("tree-sitter-typescript/tree-sitter-typescript.wasm");
+    const wasmPath = reqResolve("tree-sitter-typescript/tree-sitter-typescript.wasm");
     const Language = await Parser.Language.load(wasmPath);
     parser.setLanguage(Language);
     tsParser = parser;
   } else {
-    const wasmPath = require.resolve("tree-sitter-python/tree-sitter-python.wasm");
+    const wasmPath = reqResolve("tree-sitter-python/tree-sitter-python.wasm");
     const Language = await Parser.Language.load(wasmPath);
     parser.setLanguage(Language);
     pyParser = parser;

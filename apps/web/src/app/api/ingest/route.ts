@@ -1,4 +1,5 @@
 import { createClient } from "@quarry/db/server";
+import { createClient as createServiceClient } from "@quarry/db/service";
 import { fetchRepoTree, fetchBlobsBatch } from "@quarry/ingestion/github";
 import { detectArchetype } from "@quarry/ingestion/archetype";
 import { groupByModule } from "@quarry/ingestion/chunking/modules";
@@ -14,9 +15,7 @@ const EMBED_DIM = 1024;
 
 export async function POST(req: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -40,6 +39,7 @@ export async function POST(req: Request) {
   try {
     const { sha, paths } = await fetchRepoTree(owner, repo);
 
+    // Cache hit: same commit already done
     const { data: existing } = await supabase
       .from("repos")
       .select("id, status")
@@ -49,11 +49,7 @@ export async function POST(req: Request) {
       .eq("commit_sha", sha)
       .maybeSingle();
     if (existing && existing.status === "done") {
-      return NextResponse.json({
-        repoId: existing.id,
-        status: "done",
-        cached: true,
-      });
+      return NextResponse.json({ repoId: existing.id, status: "done", cached: true });
     }
 
     const archetype = detectArchetype(paths);
@@ -71,72 +67,83 @@ export async function POST(req: Request) {
       .select()
       .single();
 
-    const files = await fetchBlobsBatch(owner, repo, paths, sha);
+    const repoId = repoRow!.id;
 
-    await supabase
-      .from("repos")
-      .update({ status: "parsing" })
-      .eq("id", repoRow!.id);
-    const modules = groupByModule(paths);
-    const rawChunks = (
-      await Promise.all(files.map(extractSymbolChunks))
-    ).flat();
-    const chunks = coalesceChunks(rawChunks);
+    // Return immediately — run pipeline in background
+    runIngestionPipeline(repoId, owner, repo, sha, paths).catch(async (err) => {
+      console.error("[ingest] pipeline failed:", err);
+      const svc = await createServiceClient();
+      await svc.from("repos").update({ status: "failed" }).eq("id", repoId);
+    });
 
-    const { data: moduleRows } = await supabase
-      .from("modules")
-      .insert(
-        modules.map((m) => ({
-          repo_id: repoRow!.id,
-          path: m.path,
-          file_count: m.fileCount,
-        }))
-      )
-      .select();
-
-    await supabase
-      .from("repos")
-      .update({ status: "embedding" })
-      .eq("id", repoRow!.id);
-    const embedded = await embedChunks(chunks);
-
-    await ensureIndex(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, EMBED_DIM);
-    const vectorPayload = embedded.map((c, i) => ({
-      id: `${repoRow!.id}:${i}`,
-      vector: c.vector,
-      repoId: repoRow!.id,
-      moduleId: resolveModuleId(c, moduleRows ?? []),
-      filePath: c.filePath,
-    }));
-    const vectorIds = await upsertChunks(
-      PINECONE_DEMO_KEY,
-      PINECONE_DEMO_INDEX,
-      vectorPayload
-    );
-
-    await supabase.from("chunks").insert(
-      embedded.map((c, i) => ({
-        repo_id: repoRow!.id,
-        module_id: vectorPayload[i].moduleId,
-        pinecone_vector_id: vectorIds[i],
-        file_path: c.filePath,
-        symbol_name: c.symbolName,
-        symbol_type: c.symbolType,
-        start_line: c.startLine,
-        end_line: c.endLine,
-        content: c.content,
-        token_count: c.tokenCount,
-      }))
-    );
-
-    await supabase
-      .from("repos")
-      .update({ status: "done", file_count: files.length })
-      .eq("id", repoRow!.id);
-    return NextResponse.json({ repoId: repoRow!.id, status: "done" });
+    return NextResponse.json({ repoId, status: "fetching" });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
+}
+
+async function runIngestionPipeline(
+  repoId: string,
+  owner: string,
+  repo: string,
+  sha: string,
+  paths: string[]
+) {
+  // Use service-role client so it works outside the user's request context
+  const supabase = await createServiceClient();
+
+  // Fetch blobs
+  const files = await fetchBlobsBatch(owner, repo, paths, sha);
+
+  await supabase.from("repos").update({ status: "parsing" }).eq("id", repoId);
+
+  // Chunk
+  const modules = groupByModule(paths);
+  const rawChunks = (await Promise.all(files.map(extractSymbolChunks))).flat();
+  const chunks = coalesceChunks(rawChunks);
+
+  // Insert modules
+  const { data: moduleRows } = await supabase
+    .from("modules")
+    .insert(modules.map((m) => ({ repo_id: repoId, path: m.path, file_count: m.fileCount })))
+    .select();
+
+  await supabase.from("repos").update({ status: "embedding" }).eq("id", repoId);
+
+  // Embed
+  const embedded = await embedChunks(chunks);
+
+  // Upsert to Pinecone
+  await ensureIndex(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, EMBED_DIM);
+  const vectorPayload = embedded.map((c, i) => ({
+    id: `${repoId}:${i}`,
+    vector: c.vector,
+    repoId,
+    moduleId: resolveModuleId(c, moduleRows ?? []),
+    filePath: c.filePath,
+  }));
+  const vectorIds = await upsertChunks(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, vectorPayload);
+
+  // Save chunks to DB
+  await supabase.from("chunks").insert(
+    embedded.map((c, i) => ({
+      repo_id: repoId,
+      module_id: vectorPayload[i].moduleId,
+      pinecone_vector_id: vectorIds[i],
+      file_path: c.filePath,
+      symbol_name: c.symbolName,
+      symbol_type: c.symbolType,
+      start_line: c.startLine,
+      end_line: c.endLine,
+      content: c.content,
+      token_count: c.tokenCount,
+    }))
+  );
+
+  await supabase
+    .from("repos")
+    .update({ status: "done", file_count: files.length })
+    .eq("id", repoId);
 }
 
 function resolveModuleId(
@@ -146,3 +153,4 @@ function resolveModuleId(
   const match = modules.find((m) => chunk.filePath.startsWith(m.path));
   return match?.id ?? null;
 }
+

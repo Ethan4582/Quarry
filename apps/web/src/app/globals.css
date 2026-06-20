@@ -116,13 +116,15 @@
   --color-tomato: #f34e52;
   --color-coral-1: #ff7e40;
   --color-tomato-1: #ff5b5d;
-  --color-tomato-2: #ff6363;
-
-  /* UI Core Colors for Shadcn */
-  --color-background: #ffffff;
-  --color-foreground: #000000;
-  --color-border: #e0e0e0;
-  --color-ring: #007def;
+  /* UI Core Colors for Shadcn (mapped from DESIGN.md) */
+  --color-background: #0f0f11; /* --color-black-4 */
+  --color-foreground: #fcfcfd; /* --color-white */
+  --color-border: #555657; /* --color-dim-gray */
+  --color-ring: #5e6ad2; /* --color-royal-blue-1 */
+  
+  --color-panel: #18191c; /* --color-dark-gray-1 */
+  --color-card: #212123; /* --color-dark-gray-16 */
+  --color-muted: #97979a; /* --color-dark-gray */
 }
 
 @layer base {
@@ -134,5 +136,30 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(24, 25, 28, 0.6);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-light {
+    background: rgba(33, 33, 35, 0.5);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Ambient orbs for the background — gives glass something to blur against */
+  .bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    z-index: 0;
   }
 }

@@ -1,5 +1,6 @@
 import { Octokit } from "octokit";
-import { isBlocked } from "../blocklist.js";
+import { isBlocked } from "../blocklist";
+
 
 export async function fetchRepoTree(
   owner: string,
