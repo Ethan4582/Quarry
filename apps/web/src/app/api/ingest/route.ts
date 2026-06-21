@@ -11,7 +11,7 @@ import { NextResponse } from "next/server";
 
 const PINECONE_DEMO_KEY = process.env.PINECONE_TEST_KEY!;
 const PINECONE_DEMO_INDEX = "quarry-demo";
-const EMBED_DIM = 1024;
+const EMBED_DIM = 1536;
 
 export async function POST(req: Request) {
   const supabase = await createClient();
