@@ -46,17 +46,31 @@ export default async function GlobalLayout({ children }: { children: React.React
 
         {/* User */}
         <div className="p-4 border-t border-border/10">
-          <div className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 transition-colors cursor-default">
+          <div className="group relative flex items-center gap-3 px-2 py-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="" className="w-8 h-8 rounded-full border border-border/20" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-secondary border border-border/20 flex items-center justify-center text-sm text-muted-foreground">
-                {profile?.github_username?.[0]?.toUpperCase() ?? "U"}
+                {(profile?.github_username || user?.user_metadata?.user_name || "U")[0]?.toUpperCase()}
               </div>
             )}
             <div className="flex flex-col min-w-0">
-              <span className="text-sm font-medium text-foreground truncate">{profile?.github_username ?? "User"}</span>
+              <span className="text-sm font-medium text-foreground truncate">
+                {profile?.github_username || user?.user_metadata?.user_name || "User"}
+              </span>
               <span className="text-xs text-muted-foreground">Personal</span>
+            </div>
+
+            {/* Hover Menu */}
+            <div className="absolute bottom-full left-0 mb-2 hidden w-48 flex-col rounded-md border border-border bg-card p-1 shadow-lg group-hover:flex z-50">
+              <a href="/settings" className="w-full rounded-sm px-2 py-1.5 text-left text-sm text-foreground hover:bg-white/10 transition-colors">
+                Settings
+              </a>
+              <form action="/auth/signout" method="post" className="w-full">
+                <button type="submit" className="w-full rounded-sm px-2 py-1.5 text-left text-sm text-red-500 hover:bg-red-500/10 transition-colors">
+                  Sign Out
+                </button>
+              </form>
             </div>
           </div>
         </div>
