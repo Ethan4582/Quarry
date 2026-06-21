@@ -1,114 +1,92 @@
 "use client";
 
 import { use } from "react";
-import { Search, ShieldAlert, FileWarning, AlertTriangle, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { StatCard } from "@/components/StatCard";
+import { Activity, ShieldAlert, FileWarning, TrendingUp } from "lucide-react";
 
 export default function CodeHealthPage({ params }: { params: Promise<{ repoId: string }> }) {
   const { repoId } = use(params);
 
+  // Tabs: Triage (default), Hotspots & Churn, Modules, Coverage, Dead Code, Impact, Security, Trend
+  const tabs = ["Triage", "Hotspots & Churn", "Modules", "Coverage", "Dead Code", "Impact", "Security", "Trend"];
+
   return (
-    <div className="h-full flex flex-col bg-background p-6 lg:p-8 overflow-y-auto">
-      <div className="max-w-7xl mx-auto w-full space-y-6">
-        
-        {/* Header Controls */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-xl font-semibold text-foreground">Code Health</h1>
-            <p className="text-sm text-muted-foreground mt-1">Review complex files, test coverage, and maintenance risks.</p>
+    <div className="p-6 lg:p-8 max-w-[1600px] mx-auto w-full space-y-6">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Code Health</h1>
+          <p className="text-muted-foreground text-sm mt-1">Analyze technical debt, hotspots, and maintenance risks.</p>
+        </div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-border">
+        {tabs.map((tab, i) => (
+          <button
+            key={tab}
+            disabled={i > 1}
+            className={`px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap border-b-2 ${
+              i === 0 
+                ? "border-primary text-primary" 
+                : i === 1 
+                  ? "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+                  : "border-transparent text-muted-foreground/40 cursor-not-allowed"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Triage View Stub */}
+      <div className="space-y-6 pt-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <StatCard title="Files Analyzed" value="--" icon={<Activity size={16} />} />
+          <StatCard title="Avg Health" value="--" />
+          <StatCard title="Hotspot Health" value="--" />
+          <StatCard title="Worst Performer" value="--" />
+          <StatCard title="Open Findings" value="--" icon={<FileWarning size={16} />} />
+        </div>
+
+        <div className="bg-gradient-to-r from-primary/5 to-transparent border border-primary/20 rounded-lg p-4 flex items-start sm:items-center gap-4">
+          <div className="bg-primary/20 p-2 rounded-lg text-primary shrink-0">
+            <ShieldAlert size={20} />
           </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2 text-muted-foreground" size={14} />
-              <input 
-                type="text" 
-                placeholder="Search files..." 
-                className="pl-8 pr-4 py-1.5 text-sm bg-card border border-border/50 rounded-md focus:outline-none focus:ring-1 focus:ring-primary w-64 text-foreground"
-              />
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-2">
+              <h4 className="text-sm font-semibold text-foreground">Health Validation</h4>
             </div>
-            <button className="bg-card border border-border/50 p-2 rounded-md hover:bg-secondary/50 text-muted-foreground transition-colors">
-              <Filter size={14} />
-            </button>
+            <Skeleton className="h-3 w-full max-w-2xl" />
           </div>
         </div>
 
-        {/* Categories Stub */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-amber-500 mb-2">
-              <AlertTriangle size={18} />
-              <h3 className="font-semibold text-sm text-foreground">High Complexity</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3 bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-border/50 bg-secondary/5 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-foreground">Needs Triage</h3>
+              <Skeleton className="h-8 w-64 rounded-md" />
             </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
+            <div className="p-6 flex flex-col items-center justify-center opacity-50 min-h-[300px]">
+              <FileWarning className="w-8 h-8 text-muted-foreground mb-4" />
+              <p className="text-sm text-muted-foreground font-medium">No findings to triage yet.</p>
+            </div>
           </div>
-          
-          <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-red-500 mb-2">
-              <FileWarning size={18} />
-              <h3 className="font-semibold text-sm text-foreground">Hotspots</h3>
+          <div className="bg-card border border-border rounded-lg p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground mb-4">Findings by Category</h3>
+            <div className="space-y-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-8 rounded-full" />
+                  </div>
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ))}
             </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-3/4" />
-          </div>
-
-          <div className="bg-card border border-border/50 rounded-lg p-5 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-primary mb-2">
-              <ShieldAlert size={18} />
-              <h3 className="font-semibold text-sm text-foreground">Security Risks</h3>
-            </div>
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-1/2" />
           </div>
         </div>
-
-        {/* Detailed Findings Table (Skeleton) */}
-        <div className="bg-card border border-border/50 rounded-lg shadow-sm overflow-hidden flex flex-col">
-          <div className="p-4 border-b border-border/50 flex justify-between items-center bg-secondary/10">
-            <h2 className="text-sm font-semibold text-foreground">All Findings</h2>
-            <div className="flex gap-2">
-               <Skeleton className="h-8 w-24" />
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-secondary/30 border-b border-border/50">
-                <tr>
-                  <th className="p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">File</th>
-                  <th className="p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Category</th>
-                  <th className="p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Risk Score</th>
-                  <th className="p-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <tr key={i} className="hover:bg-secondary/5">
-                    <td className="p-4">
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-48" />
-                        <Skeleton className="h-3 w-32" />
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <Skeleton className="h-5 w-20 rounded-full" />
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <Skeleton className="h-2 w-16 rounded-full" />
-                        <Skeleton className="h-4 w-8" />
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <Skeleton className="h-8 w-24 rounded-md" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
       </div>
     </div>
   );

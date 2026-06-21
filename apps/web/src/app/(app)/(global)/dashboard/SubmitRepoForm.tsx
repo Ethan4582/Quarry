@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Link as LinkIcon, Github } from "lucide-react";
+import { Loader2, Link as LinkIcon } from "lucide-react";
 import Image from "next/image";
 
 export function SubmitRepoForm({ githubUsername }: { githubUsername?: string }) {
@@ -100,7 +100,7 @@ export function SubmitRepoForm({ githubUsername }: { githubUsername?: string }) 
                   disabled={loading}
                   className="flex items-center gap-2 text-left bg-dark-gray-16 hover:bg-dark-gray-20 border border-dim-gray/10 hover:border-dim-gray/25 px-2.5 py-2 rounded-md transition-colors disabled:opacity-50 group"
                 >
-                  <Image src="/github.png" alt="GitHub" width={14} height={14} className="opacity-70 shrink-0" />
+                  <Image src="/logo/github.png" alt="GitHub" width={14} height={14} className="opacity-70 shrink-0" />
                   <span className="text-sm text-dark-gray group-hover:text-white transition-colors truncate">{r.name}</span>
                 </button>
               ))}

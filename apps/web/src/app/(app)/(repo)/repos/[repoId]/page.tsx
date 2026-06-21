@@ -5,7 +5,7 @@ import { createClient } from "@quarry/db/client";
 import { Loader2, AlertTriangle, ShieldAlert, FileText, Zap, ArrowRight } from "lucide-react";
 import { use } from "react";
 import { StatCard } from "@/components/StatCard";
-import { Badge } from "@/components/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 

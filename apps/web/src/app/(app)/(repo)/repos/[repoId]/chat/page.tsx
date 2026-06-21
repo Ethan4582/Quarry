@@ -1,95 +1,99 @@
 "use client";
 
 import { use } from "react";
-import { Send, Bot, User, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Send, Zap, BrainCircuit, MessageSquareText } from "lucide-react";
 
 export default function ChatPage({ params }: { params: Promise<{ repoId: string }> }) {
   const { repoId } = use(params);
 
-  // We show the skeleton chat layout assuming the key is present but data is loading
-  const hasKey = true;
-
-  if (!hasKey) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center bg-background p-6">
-        <div className="bg-card border border-border/50 p-10 rounded-lg flex flex-col items-center justify-center text-center space-y-5 shadow-sm max-w-md w-full">
-           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-             <Sparkles className="text-primary w-8 h-8" />
-           </div>
-           <div>
-             <h3 className="text-foreground font-semibold text-lg">Chat with your Codebase</h3>
-             <p className="text-muted-foreground text-sm mt-3 leading-relaxed">
-               Ask questions about architecture, find specific implementations, or get help debugging issues across the entire repository.
-             </p>
-           </div>
-           <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors w-full mt-2">
-             Configure API Key
-           </button>
-        </div>
-      </div>
-    );
-  }
+  // Stub for pre-signin/pre-key state OR active chat state.
+  // We'll show a mixed view just for the stub layout.
 
   return (
-    <div className="h-full flex flex-col bg-background relative">
-      {/* Chat History Area (Skeleton) */}
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 max-w-4xl mx-auto w-full pb-32">
+    <div className="flex flex-col h-[calc(100vh-100px)] max-w-5xl mx-auto w-full p-4 lg:p-8">
+      <div className="flex items-center justify-between mb-6 shrink-0">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Codebase Chat</h1>
+          <p className="text-muted-foreground text-sm mt-1">Ask questions about the architecture, logic, and implementation.</p>
+        </div>
         
-        {/* Agent Greeting Skeleton */}
-        <div className="flex gap-4">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-1">
-            <Bot size={16} className="text-primary" />
-          </div>
-          <div className="flex-1 space-y-2 pt-1">
-            <Skeleton className="h-4 w-3/4 max-w-md" />
-            <Skeleton className="h-4 w-1/2 max-w-sm" />
-          </div>
-        </div>
-
-        {/* User Query Skeleton */}
-        <div className="flex gap-4 flex-row-reverse">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-1">
-            <User size={16} className="text-muted-foreground" />
-          </div>
-          <div className="flex-1 flex flex-col items-end space-y-2 pt-1">
-            <Skeleton className="h-4 w-64" />
-          </div>
-        </div>
-
-        {/* Agent Response Skeleton */}
-        <div className="flex gap-4">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-1">
-            <Bot size={16} className="text-primary" />
-          </div>
-          <div className="flex-1 space-y-3 pt-1">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-[90%]" />
-            <Skeleton className="h-4 w-[95%]" />
-            
-            <div className="p-4 bg-secondary/20 border border-border/50 rounded-md mt-4 space-y-2">
-               <Skeleton className="h-3 w-32 mb-4" />
-               <Skeleton className="h-4 w-full font-mono" />
-               <Skeleton className="h-4 w-2/3 font-mono" />
-               <Skeleton className="h-4 w-4/5 font-mono" />
-            </div>
-            
-            <Skeleton className="h-4 w-1/2 mt-4" />
-          </div>
+        <div className="flex bg-secondary/10 border border-border rounded-lg p-1">
+          <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md bg-card shadow-sm text-foreground border border-border/50">
+            <Zap size={14} className="text-primary" /> Quick
+          </button>
+          <button className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md text-muted-foreground hover:text-foreground">
+            <BrainCircuit size={14} /> Deep
+          </button>
         </div>
       </div>
 
-      {/* Input Area */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background to-transparent p-6 lg:px-8 pb-8 pt-12">
-        <div className="max-w-4xl mx-auto relative">
-          <textarea 
-            placeholder="Ask anything about the codebase..."
-            className="w-full bg-card border border-border/50 rounded-lg pl-4 pr-12 py-4 text-sm focus:outline-none focus:ring-1 focus:ring-primary text-foreground resize-none h-[60px] shadow-sm"
-          />
-          <button className="absolute right-3 top-3 p-2 bg-primary/10 text-primary hover:bg-primary/20 rounded-md transition-colors">
-            <Send size={16} />
-          </button>
+      <div className="flex-1 bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col relative">
+        
+        {/* Chat History Area */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          
+          <div className="flex gap-4 max-w-3xl">
+            <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center shrink-0 border border-border">
+              <MessageSquareText size={14} className="text-muted-foreground" />
+            </div>
+            <div className="space-y-2 mt-1">
+              <div className="text-sm font-medium text-foreground">You</div>
+              <Skeleton className="h-5 w-64" />
+            </div>
+          </div>
+
+          <div className="flex gap-4 max-w-4xl">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
+              <Zap size={14} className="text-primary" />
+            </div>
+            <div className="space-y-4 mt-1 w-full">
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium text-primary">Quarry</div>
+                <Badge variant="outline" className="text-[10px] h-4 px-1.5 py-0 border-primary/30 text-primary/70">Quick Mode</Badge>
+              </div>
+              
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Badge variant="secondary" className="font-mono text-[10px] cursor-pointer hover:bg-secondary/80">src/components/auth.ts:12</Badge>
+                <Badge variant="secondary" className="font-mono text-[10px] cursor-pointer hover:bg-secondary/80">src/lib/utils.ts:45</Badge>
+              </div>
+            </div>
+          </div>
+          
         </div>
+
+        {/* Input Area */}
+        <div className="p-4 border-t border-border bg-card">
+          <div className="max-w-4xl mx-auto">
+            {/* Suggested Queries */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <Skeleton className="h-7 w-32 rounded-full" />
+              <Skeleton className="h-7 w-48 rounded-full" />
+              <Skeleton className="h-7 w-40 rounded-full" />
+            </div>
+            
+            <div className="relative">
+              <div className="w-full bg-secondary/10 border border-border rounded-xl p-3 min-h-[80px] flex flex-col justify-end">
+                <div className="flex justify-between items-center mt-4">
+                  <div className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">~2 calls</span> · est. $0.002
+                  </div>
+                  <button className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center hover:brightness-110 shadow-[0_0_10px_rgba(229,77,46,0.2)]">
+                    <Send size={14} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
