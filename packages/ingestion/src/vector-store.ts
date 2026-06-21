@@ -48,15 +48,17 @@ export async function upsertChunks(
   for (let i = 0; i < chunks.length; i += BATCH) {
     const batch = chunks.slice(i, i + BATCH);
     await index.upsert(
-      batch.map((c) => ({
-        id: c.id,
-        values: c.vector,
-        metadata: {
-          repo_id: c.repoId,
-          module_id: c.moduleId ?? "",
-          file_path: c.filePath,
-        },
-      }))
+      {
+        records: batch.map((c) => ({
+          id: c.id,
+          values: c.vector,
+          metadata: {
+            repo_id: c.repoId,
+            module_id: c.moduleId ?? "",
+            file_path: c.filePath,
+          },
+        }))
+      } as any
     );
   }
 
@@ -85,4 +87,15 @@ export async function queryVectors(
       score: m.score ?? 0,
     })) ?? []
   );
+}
+
+export async function deleteVectorsByRepoId(
+  apiKey: string,
+  indexName: string,
+  repoId: string
+): Promise<void> {
+  const pc = new Pinecone({ apiKey });
+  const index = pc.index(indexName);
+
+  await index.deleteMany({ filter: { repo_id: repoId } });
 }

@@ -2,6 +2,7 @@ import { createClient } from "@quarry/db/server";
 import { SubmitRepoForm } from "./SubmitRepoForm";
 import Link from "next/link";
 import { StatusPill } from "@/components/StatusPill";
+import { DeleteRepoButton } from "@/components/DeleteRepoButton";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -43,24 +44,31 @@ export default async function DashboardPage() {
         ) : (
           <div className="space-y-2">
             {repos.map((repo) => (
-              <Link key={repo.id} href={`/repos/${repo.id}`} className="block">
-                <div className="flex items-center gap-4 px-4 py-3.5 rounded-lg bg-dark-gray-16/30 border border-dim-gray/10 hover:border-dim-gray/30 hover:bg-dark-gray-16 group transition-all">
-                  <div className="w-8 h-8 rounded-lg bg-dark-gray-16 border border-dim-gray/20 flex items-center justify-center shrink-0 group-hover:border-dim-gray/40 group-hover:scale-105 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-dark-gray">
-                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-base font-medium text-white truncate">
-                      <span className="text-dark-gray font-normal">{repo.github_owner}/</span>{repo.github_repo}
+              <div key={repo.id} className="relative group block">
+                <Link href={`/repos/${repo.id}`} className="block">
+                  <div className="flex items-center gap-4 px-4 py-3.5 rounded-lg bg-dark-gray-16/30 border border-dim-gray/10 hover:border-dim-gray/30 hover:bg-dark-gray-16 transition-all">
+                    <div className="w-8 h-8 rounded-lg bg-dark-gray-16 border border-dim-gray/20 flex items-center justify-center shrink-0 group-hover:border-dim-gray/40 group-hover:scale-105 transition-all">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-dark-gray">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                      </svg>
                     </div>
-                    <div className="text-sm text-dark-gray/60 mt-0.5 font-medium uppercase tracking-wider">
-                      Indexed {new Date(repo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                    <div className="flex-1 min-w-0 pr-10">
+                      <div className="text-base font-medium text-white truncate">
+                        <span className="text-dark-gray font-normal">{repo.github_owner}/</span>{repo.github_repo}
+                      </div>
+                      <div className="text-sm text-dark-gray/60 mt-0.5 font-medium uppercase tracking-wider">
+                        Indexed {new Date(repo.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                      </div>
+                    </div>
+                    <div className="mr-8">
+                      <StatusPill status={repo.status} />
                     </div>
                   </div>
-                  <StatusPill status={repo.status} />
+                </Link>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <DeleteRepoButton repoId={repo.id} repoName={`${repo.github_owner}/${repo.github_repo}`} variant="icon" />
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

@@ -89,61 +89,74 @@ async function runIngestionPipeline(
   sha: string,
   paths: string[]
 ) {
-  // Use service-role client so it works outside the user's request context
-  const supabase = await createServiceClient();
+  try {
+    const supabase = await createServiceClient();
+    console.log(`[ingest] Pipeline started for ${repoId}, paths: ${paths.length}`);
 
-  // Fetch blobs
-  const files = await fetchBlobsBatch(owner, repo, paths, sha);
+    // Fetch blobs
+    const files = await fetchBlobsBatch(owner, repo, paths, sha);
+    console.log(`[ingest] fetchBlobsBatch completed. Files fetched: ${files.length}`);
 
-  await supabase.from("repos").update({ status: "parsing" }).eq("id", repoId);
+    await supabase.from("repos").update({ status: "parsing" }).eq("id", repoId);
 
-  // Chunk
-  const modules = groupByModule(paths);
-  const rawChunks = (await Promise.all(files.map(extractSymbolChunks))).flat();
-  const chunks = coalesceChunks(rawChunks);
+    // Chunk
+    const modules = groupByModule(paths);
+    const rawChunks = (await Promise.all(files.map(extractSymbolChunks))).flat();
+    const chunks = coalesceChunks(rawChunks);
+    console.log(`[ingest] Chunking completed. Chunks created: ${chunks.length}`);
 
-  // Insert modules
-  const { data: moduleRows } = await supabase
-    .from("modules")
-    .insert(modules.map((m) => ({ repo_id: repoId, path: m.path, file_count: m.fileCount })))
-    .select();
+    // Insert modules
+    const { data: moduleRows } = await supabase
+      .from("modules")
+      .insert(modules.map((m) => ({ repo_id: repoId, path: m.path, file_count: m.fileCount })))
+      .select();
 
-  await supabase.from("repos").update({ status: "embedding" }).eq("id", repoId);
+    await supabase.from("repos").update({ status: "embedding" }).eq("id", repoId);
 
-  // Embed
-  const embedded = await embedChunks(chunks);
+    // Embed
+    console.log(`[ingest] Starting embedding...`);
+    const embedded = await embedChunks(chunks);
+    console.log(`[ingest] Embedding completed. Vectors: ${embedded.length}`);
 
-  // Upsert to Pinecone
-  await ensureIndex(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, EMBED_DIM);
-  const vectorPayload = embedded.map((c, i) => ({
-    id: `${repoId}:${i}`,
-    vector: c.vector,
-    repoId,
-    moduleId: resolveModuleId(c, moduleRows ?? []),
-    filePath: c.filePath,
-  }));
-  const vectorIds = await upsertChunks(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, vectorPayload);
+    // Upsert to Pinecone
+    console.log(`[ingest] Starting Pinecone upsert...`);
+    await ensureIndex(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, EMBED_DIM);
+    const vectorPayload = embedded.map((c, i) => ({
+      id: `${repoId}:${i}`,
+      vector: c.vector,
+      repoId,
+      moduleId: resolveModuleId(c, moduleRows ?? []),
+      filePath: c.filePath,
+    }));
+    const vectorIds = await upsertChunks(PINECONE_DEMO_KEY, PINECONE_DEMO_INDEX, vectorPayload);
+    console.log(`[ingest] Pinecone upsert completed. Vector IDs: ${vectorIds.length}`);
 
-  // Save chunks to DB
-  await supabase.from("chunks").insert(
-    embedded.map((c, i) => ({
-      repo_id: repoId,
-      module_id: vectorPayload[i].moduleId,
-      pinecone_vector_id: vectorIds[i],
-      file_path: c.filePath,
-      symbol_name: c.symbolName,
-      symbol_type: c.symbolType,
-      start_line: c.startLine,
-      end_line: c.endLine,
-      content: c.content,
-      token_count: c.tokenCount,
-    }))
-  );
+    // Save chunks to DB
+    await supabase.from("chunks").insert(
+      embedded.map((c, i) => ({
+        repo_id: repoId,
+        module_id: vectorPayload[i].moduleId,
+        pinecone_vector_id: vectorIds[i],
+        file_path: c.filePath,
+        symbol_name: c.symbolName,
+        symbol_type: c.symbolType,
+        start_line: c.startLine,
+        end_line: c.endLine,
+        content: c.content,
+        token_count: c.tokenCount,
+      }))
+    );
+    console.log(`[ingest] DB chunks inserted.`);
 
-  await supabase
-    .from("repos")
-    .update({ status: "done", file_count: files.length })
-    .eq("id", repoId);
+    await supabase
+      .from("repos")
+      .update({ status: "done", file_count: files.length })
+      .eq("id", repoId);
+    console.log(`[ingest] Pipeline fully finished!`);
+  } catch (err) {
+    console.error(`[ingest] PIPELINE CRASHED:`, err);
+    throw err;
+  }
 }
 
 function resolveModuleId(

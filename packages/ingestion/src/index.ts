@@ -12,4 +12,4 @@ export type { RawChunk } from "./chunking/symbols";
 export { coalesceChunks } from "./chunking/coalesce";
 export { embedChunks } from "./embeddings";
 export type { EmbeddedChunk } from "./embeddings";
-export { ensureIndex, upsertChunks, queryVectors } from "./vector-store";
+export { ensureIndex, upsertChunks, queryVectors, deleteVectorsByRepoId } from "./vector-store";

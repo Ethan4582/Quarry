@@ -22,5 +22,8 @@
   "type": "module",
   "devDependencies": {
     "turbo": "^2.9.18"
+  },
+  "dependencies": {
+    "@pinecone-database/pinecone": "^8.0.0"
   }
 }
