@@ -113,44 +113,37 @@ function getPrecedingComment(
   return prev.text;
 }
 
+import { analyzeAst, type FileAnalytics } from "../analytics/complexity";
+
 export async function extractSymbolChunks(file: {
   path: string;
   content: string;
-}): Promise<RawChunk[]> {
+}): Promise<{ chunks: RawChunk[]; analytics?: FileAnalytics }> {
   const ext = "." + file.path.split(".").pop();
   const lang = getLanguageForExt(ext);
+  const sourceLines = file.content.split("\n");
+  const fallbackChunk = {
+    filePath: file.path,
+    symbolName: file.path.split("/").pop() ?? file.path,
+    symbolType: "file",
+    startLine: 1,
+    endLine: sourceLines.length,
+    content: file.content,
+  };
+
   if (!lang) {
-    return [
-      {
-        filePath: file.path,
-        symbolName: file.path.split("/").pop() ?? file.path,
-        symbolType: "file",
-        startLine: 1,
-        endLine: file.content.split("\n").length,
-        content: file.content,
-      },
-    ];
+    return { chunks: [fallbackChunk] };
   }
 
   let parser: Parser;
   try {
     parser = await getParser(lang);
   } catch {
-    return [
-      {
-        filePath: file.path,
-        symbolName: file.path.split("/").pop() ?? file.path,
-        symbolType: "file",
-        startLine: 1,
-        endLine: file.content.split("\n").length,
-        content: file.content,
-      },
-    ];
+    return { chunks: [fallbackChunk] };
   }
 
   const tree = parser.parse(file.content);
   const root = tree.rootNode;
-  const sourceLines = file.content.split("\n");
   const chunks: RawChunk[] = [];
 
   const topLevelTypes = lang === "typescript" ? TOP_LEVEL_TS : TOP_LEVEL_PY;
@@ -175,18 +168,11 @@ export async function extractSymbolChunks(file: {
     });
   }
 
+  const analytics = analyzeAst(root, file.path, sourceLines.length);
+
   if (chunks.length === 0) {
-    return [
-      {
-        filePath: file.path,
-        symbolName: file.path.split("/").pop() ?? file.path,
-        symbolType: "file",
-        startLine: 1,
-        endLine: sourceLines.length,
-        content: file.content,
-      },
-    ];
+    return { chunks: [fallbackChunk], analytics };
   }
 
-  return chunks;
+  return { chunks, analytics };
 }

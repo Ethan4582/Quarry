@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./github": "./src/github/index.ts",
+    "./github/analytics": "./src/github/analytics.ts",
     "./archetype": "./src/archetype.ts",
     "./chunking/modules": "./src/chunking/modules.ts",
     "./chunking/symbols": "./src/chunking/symbols.ts",

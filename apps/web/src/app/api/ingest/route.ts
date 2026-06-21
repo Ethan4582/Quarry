@@ -82,6 +82,8 @@ export async function POST(req: Request) {
   }
 }
 
+import { fetchGitHubAnalytics } from "@quarry/ingestion/github/analytics";
+
 async function runIngestionPipeline(
   repoId: string,
   owner: string,
@@ -99,11 +101,17 @@ async function runIngestionPipeline(
 
     await supabase.from("repos").update({ status: "parsing" }).eq("id", repoId);
 
-    // Chunk
+    // Chunk & Analyze AST
     const modules = groupByModule(paths);
-    const rawChunks = (await Promise.all(files.map(extractSymbolChunks))).flat();
+    const extractionResults = await Promise.all(
+      files.map(async (file) => {
+        const res = await extractSymbolChunks(file);
+        return { filePath: file.path, chunks: res.chunks, analytics: res.analytics };
+      })
+    );
+    const rawChunks = extractionResults.map((r) => r.chunks).flat();
     const chunks = coalesceChunks(rawChunks);
-    console.log(`[ingest] Chunking completed. Chunks created: ${chunks.length}`);
+    console.log(`[ingest] Chunking & AST analysis completed. Chunks created: ${chunks.length}`);
 
     // Insert modules
     const { data: moduleRows } = await supabase
@@ -147,6 +155,65 @@ async function runIngestionPipeline(
       }))
     );
     console.log(`[ingest] DB chunks inserted.`);
+
+    // --- PHASE A2 ANALYTICS ---
+    await supabase.from("repos").update({ status: "analyzing" }).eq("id", repoId);
+    
+    // 1. Insert File Health & Dependencies
+    const healthPayload = [];
+    const depsPayload = [];
+    
+    for (const r of extractionResults) {
+      if (!r.analytics) continue;
+      
+      healthPayload.push({
+        repo_id: repoId,
+        file_path: r.filePath,
+        ccn: r.analytics.ccn,
+        nesting: r.analytics.nesting,
+        nloc: r.analytics.nloc,
+        dup_pct: 0,
+        churn_pct: 0,
+        is_dead_code: false,
+        health_score: Math.max(1, 10 - r.analytics.ccn / 10), // Heuristic
+      });
+
+      for (const d of r.analytics.dependencies) {
+        depsPayload.push({
+          repo_id: repoId,
+          from_module: r.filePath,
+          to_module: d.to,
+          ecosystem: d.ecosystem,
+        });
+      }
+    }
+
+    if (healthPayload.length > 0) {
+      await supabase.from("file_health").insert(healthPayload);
+    }
+    if (depsPayload.length > 0) {
+      await supabase.from("dependencies").insert(depsPayload);
+    }
+    console.log(`[ingest] AST Analytics inserted.`);
+
+    // 2. Fetch & Insert GitHub Stats
+    try {
+      const gitStats = await fetchGitHubAnalytics(owner, repo);
+      if (gitStats.commits.length > 0) {
+        await supabase.from("commits").insert(
+          gitStats.commits.map(c => ({ ...c, repo_id: repoId }))
+        );
+      }
+      if (gitStats.contributors.length > 0) {
+        await supabase.from("contributors").insert(
+          gitStats.contributors.map(c => ({ ...c, repo_id: repoId }))
+        );
+      }
+      console.log(`[ingest] GitHub Stats inserted.`);
+    } catch (gitErr) {
+      console.error("[ingest] GitHub Stats fetch failed:", gitErr);
+      // Don't fail the whole pipeline if just GitHub stats fail
+    }
 
     await supabase
       .from("repos")
